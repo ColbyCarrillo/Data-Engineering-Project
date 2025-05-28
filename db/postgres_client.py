@@ -1,3 +1,5 @@
+#pylint: disable=line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import psycopg2
 
 class PostgresClient:
@@ -6,7 +8,7 @@ class PostgresClient:
         self.cursor = self.conn.cursor()
 
     def create_tables_from_file(self, schema_path):
-        with open(schema_path, 'r') as f:
+        with open(schema_path, 'r', encoding='utf-8') as f:
             self.cursor.execute(f.read())
         self.conn.commit()
 

@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import pandas as pd
 from ingestion.noaa_downloader import NOAADownloader
 from ingestion.noaa_parser import NOAAParser
@@ -13,10 +15,10 @@ class WeatherPipeline:
         self.db.create_tables_from_file(schema_path)
         stations_path = self.downloader.download_stations_file()
         stations_df = pd.read_csv(stations_path)
-        
+
         for _, row in stations_df.iterrows():
             self.db.insert_station(row)
-        
+
         self.db.conn.commit()
         print(f"Inserted {len(stations_df)} stations.")
         print("Stations pipeline completed.")
