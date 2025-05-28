@@ -1,6 +1,7 @@
+#pylint: disable=line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import psycopg2
 
-#pylint: disable=line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring
 class PostgresClient:
     def __init__(self, db_config):
         self.conn = psycopg2.connect(**db_config)

@@ -1,9 +1,10 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import pandas as pd
 from ingestion.noaa_downloader import NOAADownloader
 from ingestion.noaa_parser import NOAAParser
 from db.postgres_client import PostgresClient
 
-# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
 class WeatherPipeline:
     def __init__(self, db_config):
         self.db = PostgresClient(db_config)

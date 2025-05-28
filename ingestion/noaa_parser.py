@@ -1,7 +1,8 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import os
 from datetime import datetime
 
-# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
 class NOAAParser:
     def __init__(self, db_client):
         self.db = db_client

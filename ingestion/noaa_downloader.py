@@ -1,9 +1,10 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import os
 import requests
 import tarfile
 from ingestion.noaa_parser import NOAAParser
 
-# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
 class NOAADownloader:
     def __init__(self, data_dir='data'):
         self.data_dir = data_dir
