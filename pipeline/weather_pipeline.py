@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+
 import pandas as pd
 from ingestion.noaa_downloader import NOAADownloader
 from ingestion.noaa_parser import NOAAParser

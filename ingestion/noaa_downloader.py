@@ -1,7 +1,8 @@
-from os import path as os_path, makedirs, getenv
-import requests
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+
+import os
 import tarfile
-import pandas as pd
+import requests
 from ingestion.noaa_parser import NOAAParser
 
 class NOAADownloader:
@@ -14,10 +15,9 @@ class NOAADownloader:
         self.us_stations_ids = set()
         
     def download_stations_file(self):
-        path = os_path.join(self.data_dir, "stations.csv")
-        if not os_path.exists(path):
-            # Write in binary as .contents is type bytes
-            r = requests.get(self.station_url)
+        path = os.path.join(self.data_dir, "stations.csv")
+        if not os.path.exists(path):
+            r = requests.get(self.station_url, timeout=15)
             with open(path, 'wb') as f:
                 f.write(r.content)
         return path
@@ -35,8 +35,8 @@ class NOAADownloader:
         archive_path = os_path.join(self.data_dir, archive_name)
         extract_path = os_path.join(self.data_dir, f"gsod_{year}")
 
-        if not os_path.exists(archive_path):
-            r = requests.get(self.archive_base_url + archive_name, stream=True)
+        if not os.path.exists(archive_path):
+            r = requests.get(self.archive_base_url + archive_name, stream=True, timeout=15)
             with open(archive_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
@@ -46,7 +46,6 @@ class NOAADownloader:
                 tar.extractall(path=extract_path)
 
         return extract_path
-    
 
     def download_and_extract_us_stations(self, year):
         """Downloads and extracts ONLY U.S. station data based on filtered list."""
