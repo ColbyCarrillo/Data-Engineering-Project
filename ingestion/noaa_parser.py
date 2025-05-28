@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long, too-many-locals, too-few-public-methods, missing-module-docstring, missing-class-docstring, missing-function-docstring
+# pylint: disable=line-too-long, too-many-locals, bare-except, too-few-public-methods, missing-module-docstring, missing-class-docstring, missing-function-docstring
 
 import os
 from datetime import datetime
@@ -42,7 +42,7 @@ class NOAAParser:
                 try:
                     date = datetime.strptime(date_str, "%Y-%m-%d").date()
                 except:
-                    continue # pylint disable=bare-except # Skip rows with invalid dates
+                    continue # Skip rows with invalid dates
 
                 for element in weather_elements:
                     value = row.get(element, None)
@@ -52,7 +52,7 @@ class NOAAParser:
                     try:
                         value = round(float(value))
                     except:
-                        continue # pylint disable=bare-except
+                        continue
 
                     self.db.cursor.execute(
                         """
