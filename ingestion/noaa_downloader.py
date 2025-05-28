@@ -1,8 +1,8 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
 
 import os
-import requests
 import tarfile
+import requests
 from ingestion.noaa_parser import NOAAParser
 
 class NOAADownloader:
@@ -15,7 +15,7 @@ class NOAADownloader:
     def download_stations_file(self):
         path = os.path.join(self.data_dir, "stations.csv")
         if not os.path.exists(path):
-            r = requests.get(self.station_url)
+            r = requests.get(self.station_url, timeout=15)
             with open(path, 'wb') as f:
                 f.write(r.content)
         return path
@@ -26,7 +26,7 @@ class NOAADownloader:
         extract_path = os.path.join(self.data_dir, f"gsod_{year}")
 
         if not os.path.exists(archive_path):
-            r = requests.get(self.archive_base_url + archive_name, stream=True)
+            r = requests.get(self.archive_base_url + archive_name, stream=True, timeout=15)
             with open(archive_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
