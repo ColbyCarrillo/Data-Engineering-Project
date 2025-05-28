@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+# pylint: disable=line-too-long, too-many-locals, too-few-public-methods, missing-module-docstring, missing-class-docstring, missing-function-docstring
 
 import os
 from datetime import datetime
@@ -14,7 +14,7 @@ class NOAAParser:
             "TEMP", "DEWP", "SLP", "VISIB", "WDSP",
             "PRCP", "SNDP", "MAX", "MIN"
         ]
-        
+
         inserted = 0  # Track rows inserted
 
         file_list = [f for f in os.listdir(folder_path) if f.endswith(".csv")]
@@ -27,7 +27,7 @@ class NOAAParser:
             try:
                 # Specify dtype for 'STATION' to ensure don't lose leading zeros
                 df = pd.read_csv(file_path, dtype={"STATION": str})
-            except Exception as e:
+            except (pd.errors.ParserError, FileNotFoundError) as e:
                 print(f"Error reading {file_path}: {e}")
                 continue
 
@@ -42,7 +42,7 @@ class NOAAParser:
                 try:
                     date = datetime.strptime(date_str, "%Y-%m-%d").date()
                 except:
-                    continue  # Skip rows with invalid dates
+                    continue # pylint disable=bare-except # Skip rows with invalid dates
 
                 for element in weather_elements:
                     value = row.get(element, None)
@@ -52,7 +52,7 @@ class NOAAParser:
                     try:
                         value = round(float(value))
                     except:
-                        continue
+                        continue # pylint disable=bare-except
 
                     self.db.cursor.execute(
                         """
