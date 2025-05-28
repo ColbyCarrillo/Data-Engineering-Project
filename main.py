@@ -24,8 +24,11 @@ db_config = {
 
 pipeline = WeatherPipeline(db_config)
 
+# Setup Schema
+pipeline.setup_schema("db/NOAAschema.sql")
+
 # Set up DB + load stations
-pipeline.run_stations_pipeline("db/NOAAschema.sql")
+pipeline.run_stations_pipeline()
 
 # Download + insert weather data
 pipeline.run_weather_pipeline(2022)
