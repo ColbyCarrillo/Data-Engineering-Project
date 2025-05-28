@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
 class NOAAParser:
     def __init__(self, db_client):
         self.db = db_client
@@ -34,7 +35,7 @@ class NOAAParser:
                 continue
 
             file_path = os.path.join(folder_path, file_name)
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     row = self.parse_line(line)
                     if row and row["value"] is not None:

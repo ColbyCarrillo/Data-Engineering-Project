@@ -3,6 +3,7 @@ import requests
 import tarfile
 from ingestion.noaa_parser import NOAAParser
 
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
 class NOAADownloader:
     def __init__(self, data_dir='data'):
         self.data_dir = data_dir
@@ -34,9 +35,8 @@ class NOAADownloader:
                 tar.extractall(path=extract_path)
 
         return extract_path
-    
+
     def download_and_parse_year(self, year, db_client):
         extract_path = self.download_year_archive(year)
         parser = NOAAParser(db_client)
         parser.parse_folder_and_insert(extract_path)
-
