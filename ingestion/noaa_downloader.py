@@ -4,6 +4,7 @@ import os
 import tarfile
 import requests
 import pandas as pd
+import tqdm
 
 class NOAADownloader:
     def __init__(self, data_dir='data'):
@@ -27,7 +28,7 @@ class NOAADownloader:
         df = df[df['CTRY'] == 'US']
         df['STATION'] = df['USAF'].astype(str).str.zfill(6) + df['WBAN'].astype(str).str.zfill(5)
         self.us_stations_ids = set(df['STATION'].dropna())
-        print(f"Filtered {len(self.us_stations_ids)} US station IDs.")
+        # print(f"Filtered {len(self.us_stations_ids)} US station IDs.")
 
     def download_year_archive(self, year):
         """Downloads and extracts all stations (no filtering)."""
@@ -37,13 +38,18 @@ class NOAADownloader:
 
         if not os.path.exists(archive_path):
             r = requests.get(self.archive_base_url + archive_name, stream=True, timeout=15)
+            total_size = int(r.headers.get('content-length', 0))
             with open(archive_path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
+                with tqdm.tqdm(total=total_size, unit='B', unit_scale=True, desc=f"Downloading {archive_name}") as pbar:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                        pbar.update(len(chunk))
 
         if not os.path.exists(extract_path):
             with tarfile.open(archive_path, "r:gz") as tar:
-                tar.extractall(path=extract_path)
+                members = tar.getmembers()  # List of files in archive
+                for member in tqdm(members, desc="Extracting", unit="file"):
+                    tar.extract(member, path=extract_path)
 
         return extract_path
 
