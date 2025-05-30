@@ -6,13 +6,18 @@ This folder contains all **dbt transformations** for the NOAA Weather Data Pipel
 
 noaa_dbt/
 ├── models/
-│ ├── staging/ # Raw data cleaned and standardized
+│ ├── staging/
 │ │ ├── stg_stations.sql
 │ │ └── stg_daily_weather.sql
-│ ├── gold/ # Aggregated, analysis-ready tables
-│ │ └── gold_daily_weather_summary.sql
+│ ├── gold/
+│ │ ├── gold_daily_weather_summary.sql
 │ │ └── gold_station_gaps.sql
-├── dbt_project.yml # Main dbt project config
+│ ├── staging/
+│ │ ├── schema.yml
+│ └── gold/
+│ └── schema.yml
+│ └── README.md
+└── dbt_project.yml # Main dbt project config
 
 ## How to Run
 
@@ -27,6 +32,15 @@ noaa_dbt/
     dbt run
     dbt test
     ```
+
+## Highlights
+- Modular, maintainable transformations using staging and gold layers
+
+- Reproducible builds and tests
+
+- Detects data gaps using generate_series() and window functions
+
+- Tests for nulls, uniqueness, and relationships
 
 ##  Notes
 - This is part of a larger data pipeline project using Python, Docker, and PostgreSQL
