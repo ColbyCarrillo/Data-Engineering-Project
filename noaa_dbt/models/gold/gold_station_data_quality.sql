@@ -1,5 +1,3 @@
--- models/gold/gold_station_data_quality.sql
-
 {{ config(materialized='view') }}
 
 with date_range as (
