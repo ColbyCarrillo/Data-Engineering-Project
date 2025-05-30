@@ -1,6 +1,6 @@
 #pylint: disable=line-too-long, too-many-arguments, too-many-positional-arguments, missing-module-docstring, missing-class-docstring, missing-function-docstring
 
-from datetime import datetime, timezone
+import datetime
 import psycopg2
 
 class PostgresClient:
@@ -34,7 +34,7 @@ class PostgresClient:
                 station.get('LON'),
                 station.get('ELEV(M)'),
                 ingestion_id,
-                datetime.now(timezone.utc)
+                datetime.datetime.now(datetime.timezone.utc)
             )
         )
 
@@ -54,7 +54,7 @@ class PostgresClient:
                 record.get("mflag"), record.get("qflag"),
                 record.get("sflag"), record.get("obs_time"),
                 ingestion_id,
-                datetime.now(datetime.timezone.utc)
+                datetime.datetime.now(datetime.timezone.utc)
             )
         )
 
