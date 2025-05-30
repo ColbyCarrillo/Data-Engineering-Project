@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_stations
+    description: "Cleaned station metadata from NOAA"
+    columns:
+      - name: usaf
+        tests:
+          - not_null
+      - name: wban
+        tests:
+          - not_null
+      - name: name
+        description: "Station name"
+  - name: stg_daily_weather
+    description: "Cleaned daily weather observations from NOAA"
+    columns:
+      - name: usaf
+      - name: wban
+      - name: date
+      - name: element
+      - name: value
+      - name: ingestion_log_id
+      - name: inserted_at
+    tests:
+      - not_null:
+          column_name: usaf
+      - not_null:
+          column_name: wban
+      - not_null:
+          column_name: date
+      - not_null:
+          column_name: element
+      - not_null:
+          column_name: value
+      - not_null:
+          column_name: ingestion_log_id
+      - not_null:
+          column_name: inserted_at

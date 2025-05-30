@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: public
+    description: Raw NOAA tables loaded into Postgres
+    database: mydatabase
+    schema: public
+    tables:
+      - name: stations
+        description: Raw stations metadata
+      - name: daily_weather
+        description: Raw daily weather records

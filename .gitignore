@@ -3,3 +3,14 @@
 venv/
 postgres-data/
 data/
+
+# dbt artifacts
+dbt_packages/
+manifest.json
+run_results.json
+logs/
+target/
+*.pyc
+
+# Global DBT profile
+.dbt/

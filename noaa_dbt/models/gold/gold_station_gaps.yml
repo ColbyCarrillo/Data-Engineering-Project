@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: gold_station_gaps
+    description: >
+      Contains start and end dates of missing daily weather data per station.
+
+    columns:
+      - name: usaf
+        description: USAF station code
+
+      - name: wban
+        description: WBAN station code
+
+      - name: gap_start
+        description: First missing date in the gap
+
+      - name: gap_end
+        description: Last missing date in the gap
+
+      - name: gap_length
+        description: Number of days in the gap
+
+    tests:
+      - not_null:
+          column_name: usaf
+
+      - not_null:
+          column_name: wban
+
+      - not_null:
+          column_name: gap_start
+
+      - not_null:
+          column_name: gap_end
+
+      - not_null:
+          column_name: gap_length
+
+      - dbt_utils.expression_is_true:
+          name: gap_length_positive
+          expression: "gap_length > 0"

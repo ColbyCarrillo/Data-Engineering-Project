@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: gold_daily_weather_summary
+    description: >
+      Summarized weather data by station and date, including average, min, and max values for temperature and precipitation.
+
+    columns:
+      - name: usaf
+        description: Station identifier (USAF code)
+
+      - name: wban
+        description: Station identifier (WBAN code)
+
+      - name: date
+        description: Date of the weather observation
+
+      - name: avg_temp
+        description: Average daily temperature (°C)
+
+      - name: min_temp
+        description: Minimum daily temperature (°C)
+
+      - name: max_temp
+        description: Maximum daily temperature (°C)
+
+      - name: total_prcp
+        description: Total daily precipitation (mm)
+
+    tests:
+      - not_null:
+          column_name: usaf
+      - not_null:
+          column_name: wban
+      - not_null:
+          column_name: date
+      - unique:
+          column_name: [usaf, wban, date]
+          
