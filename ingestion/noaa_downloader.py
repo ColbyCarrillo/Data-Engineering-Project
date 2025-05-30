@@ -38,12 +38,12 @@ class NOAADownloader:
 
         if not os.path.exists(archive_path):
             r = requests.get(self.archive_base_url + archive_name, stream=True, timeout=15)
-            total_size = int(r.headers.get('content-length', 0))
+            tot_ln = int(r.headers.get('content-length', 0))
             with open(archive_path, 'wb') as f:
-                with tqdm.tqdm(total=total_size, unit='B', unit_scale=True, desc=f"Downloading {archive_name}") as pbar:
+                with tqdm(total=tot_ln, unit='B',unit_scale=True, desc=f"DL: {archive_name}") as p:
                     for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
-                        pbar.update(len(chunk))
+                        p.update(len(chunk))
 
         if not os.path.exists(extract_path):
             with tarfile.open(archive_path, "r:gz") as tar:

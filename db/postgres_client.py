@@ -1,7 +1,7 @@
-#pylint: disable=line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring
+#pylint: disable=line-too-long, too-many-arguments, too-many-positional-arguments, missing-module-docstring, missing-class-docstring, missing-function-docstring
 
-import psycopg2
 from datetime import datetime, timezone
+import psycopg2
 
 class PostgresClient:
     def __init__(self, db_config):

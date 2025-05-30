@@ -20,7 +20,7 @@ class WeatherPipeline:
     def run_stations_pipeline(self):
         """Download and load station data into the database."""
         stations_path = self.downloader.download_stations_file()
-        
+
         if self.db.is_file_already_ingested("NOAA_Weather", stations_path):
             print("Stations data already ingested. Skipping.")
             return
@@ -34,7 +34,7 @@ class WeatherPipeline:
         ingestion_id = self.db.log_ingestion("NOAA_Weather", stations_path, 0)
         rows_inserted = 0
 
-        for _, row in tqdm(stations_df.iterrows(), total=len(stations_df), desc="Inserting stations"):
+        for _, row in tqdm(stations_df.iterrows(), total=len(stations_df), desc="Insert stations"):
             self.db.insert_station(row, ingestion_id)
             rows_inserted += 1
 
