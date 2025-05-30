@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long, too-many-locals, bare-except, too-few-public-methods, missing-module-docstring, missing-class-docstring, missing-function-docstring
+# pylint: disable=line-too-long, broad-exception-caught, too-many-locals, bare-except, too-few-public-methods, missing-module-docstring, missing-class-docstring, missing-function-docstring
 
 import os
 from datetime import datetime

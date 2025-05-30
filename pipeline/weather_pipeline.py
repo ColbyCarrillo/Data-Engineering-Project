@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring
+# pylint: disable=missing-module-docstring, broad-exception-caught, missing-class-docstring, missing-function-docstring
 
 import pandas as pd
 from tqdm import tqdm

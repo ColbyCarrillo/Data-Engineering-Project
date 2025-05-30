@@ -4,7 +4,7 @@ import os
 import tarfile
 import requests
 import pandas as pd
-import tqdm
+from tqdm import tqdm
 
 class NOAADownloader:
     def __init__(self, data_dir='data'):
