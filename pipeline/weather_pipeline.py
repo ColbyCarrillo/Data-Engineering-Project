@@ -1,14 +1,11 @@
 # pylint: disable=missing-module-docstring, broad-exception-caught, missing-class-docstring, missing-function-docstring
 
-import pandas as pd
-from tqdm import tqdm
 from ingestion.noaa_downloader import NOAADownloader
 from ingestion.noaa_parser import NOAAParser
-from db.postgres_client import PostgresClient
 
 class WeatherPipeline:
-    def __init__(self, db_config):
-        self.db = PostgresClient(db_config)
+    def __init__(self, db_client):
+        self.db = db_client
         self.downloader = NOAADownloader()
         self.parser = NOAAParser(self.db)
 
@@ -20,31 +17,7 @@ class WeatherPipeline:
     def run_stations_pipeline(self):
         """Download and load station data into the database."""
         stations_path = self.downloader.download_stations_file()
-
-        if self.db.is_file_already_ingested("NOAA_Weather", stations_path):
-            print("Stations data already ingested. Skipping.")
-            return
-        try:
-            stations_df = pd.read_csv(stations_path)
-        except Exception as e:
-            self.db.log_ingestion("NOAA_Weather", stations_path, 0, False, str(e))
-            return
-
-        # Log and get the ingestion ID
-        ingestion_id = self.db.log_ingestion("NOAA_Weather", stations_path, 0)
-        rows_inserted = 0
-
-        for _, row in tqdm(stations_df.iterrows(), total=len(stations_df), desc="Insert stations"):
-            self.db.insert_station(row, ingestion_id)
-            rows_inserted += 1
-
-        self.db.conn.commit()
-
-        # Update ingestion record with number of rows inserted
-        self.db.update_ingestion_record(ingestion_id, rows_inserted, success=True)
-
-        print(f"Inserted {len(stations_df)} stations.")
-        print("Stations pipeline completed.")
+        self.parser.parse_stations_and_insert(stations_path)
 
     def run_weather_pipeline(self, year):
         """Download and load U.S.-only weather data for a given year."""
@@ -53,3 +26,28 @@ class WeatherPipeline:
 
     def close(self):
         self.db.close()
+
+if __name__ == "__main__":
+    print("Running full weather pipeline...")
+
+    import os
+    from dotenv import load_dotenv
+    from pipeline.weather_pipeline import WeatherPipeline
+    from db.postgres_client import PostgresClient
+
+    load_dotenv()
+
+    db_config = {
+        "host": os.getenv("POSTGRES_HOST"),
+        "port": os.getenv("POSTGRES_PORT"),
+        "dbname": os.getenv("POSTGRES_DB"),
+        "user": os.getenv("POSTGRES_USER"),
+        "password": os.getenv("POSTGRES_PASSWORD"),
+    }
+
+    db = PostgresClient(db_config)
+    pipeline = WeatherPipeline(db)
+    pipeline.setup_schema("/opt/airflow/db/NOAAschema.sql")  # Or update path for local use
+    pipeline.run_stations_pipeline()
+    pipeline.run_weather_pipeline(year=os.getenv("DOWNLOAD_YEAR", "2023"))
+    pipeline.close()

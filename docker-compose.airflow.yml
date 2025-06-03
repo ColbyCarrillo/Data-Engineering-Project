@@ -1,0 +1,54 @@
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.8.1
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+    PYTHONPATH: /opt/airflow
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/requirements.txt:/requirements.txt
+    - ./airflow/init_schema.py:/opt/airflow/init_schema.py
+    - ./pipeline:/opt/airflow/pipeline
+    - ./db:/opt/airflow/db
+    - ./ingestion:/opt/airflow/ingestion
+    - ./noaa_dbt:/opt/airflow/noaa_dbt
+    - ${HOME}/.dbt:/home/airflow/.dbt
+
+services:
+  airflow-init:
+    <<: *airflow-common
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+      - .env.airflow
+    entrypoint: >
+      bash -c "airflow db migrate && airflow users create --username ${AIRFLOW_USER} --password ${AIRFLOW_PASSWORD} --firstname Admin --lastname User --role Admin --email admin@admin.com"
+
+  airflow-webserver:
+    <<: *airflow-common
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+      - .env.airflow
+    command: bash -c "pip install -r /requirements.txt && airflow webserver"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+      - .env.airflow
+    command: bash -c "pip install -r /requirements.txt && airflow scheduler"

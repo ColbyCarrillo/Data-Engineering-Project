@@ -6,11 +6,11 @@ import requests
 import pandas as pd
 from tqdm import tqdm
 
+
 class NOAADownloader:
     def __init__(self, data_dir='data'):
         self.data_dir = data_dir
         os.makedirs(self.data_dir, exist_ok=True)
-        # Static website variables - NOAA GSOD data
         self.station_url = os.getenv('STATION_URL')
         self.archive_base_url = os.getenv('ARCHIVE_BASE_URL')
         self.us_stations_ids = set()
@@ -28,10 +28,8 @@ class NOAADownloader:
         df = df[df['CTRY'] == 'US']
         df['STATION'] = df['USAF'].astype(str).str.zfill(6) + df['WBAN'].astype(str).str.zfill(5)
         self.us_stations_ids = set(df['STATION'].dropna())
-        # print(f"Filtered {len(self.us_stations_ids)} US station IDs.")
 
     def download_year_archive(self, year):
-        """Downloads and extracts all stations (no filtering)."""
         archive_name = f"{year}.tar.gz"
         archive_path = os.path.join(self.data_dir, archive_name)
         extract_path = os.path.join(self.data_dir, f"gsod_{year}")
@@ -40,21 +38,20 @@ class NOAADownloader:
             r = requests.get(self.archive_base_url + archive_name, stream=True, timeout=15)
             tot_ln = int(r.headers.get('content-length', 0))
             with open(archive_path, 'wb') as f:
-                with tqdm(total=tot_ln, unit='B',unit_scale=True, desc=f"DL: {archive_name}") as p:
+                with tqdm(total=tot_ln, unit='B', unit_scale=True, desc=f"DL: {archive_name}") as p:
                     for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
                         p.update(len(chunk))
 
         if not os.path.exists(extract_path):
             with tarfile.open(archive_path, "r:gz") as tar:
-                members = tar.getmembers()  # List of files in archive
+                members = tar.getmembers()
                 for member in tqdm(members, desc="Extracting", unit="file"):
                     tar.extract(member, path=extract_path)
 
         return extract_path
 
     def download_and_extract_us_stations(self, year):
-        """Downloads and extracts ONLY U.S. station data based on filtered list."""
         stations_csv_path = self.download_stations_file()
         self.filter_us_stations_ids(stations_csv_path)
 
@@ -78,3 +75,37 @@ class NOAADownloader:
                             tar.extract(member, path=extract_path)
 
         return extract_path
+
+if __name__ == "__main__":
+    print("Starting NOAA downloader script...")
+
+    import sys
+    import os
+    from dotenv import load_dotenv
+    from pipeline.weather_pipeline import WeatherPipeline
+    from db.postgres_client import PostgresClient
+
+    if os.getenv("AIRFLOW_HOME"):
+        sys.path.append("/opt/airflow")
+
+    load_dotenv()
+
+    db_config = {
+        "host": os.getenv("POSTGRES_HOST"),
+        "port": os.getenv("POSTGRES_PORT"),
+        "dbname": os.getenv("POSTGRES_DB"),
+        "user": os.getenv("POSTGRES_USER"),
+        "password": os.getenv("POSTGRES_PASSWORD"),
+    }
+
+    year = os.getenv("DOWNLOAD_YEAR", "2023")
+    downloader = NOAADownloader(data_dir="/opt/airflow/data")
+    stations_path = downloader.download_stations_file()
+
+    db = PostgresClient(db_config)
+    pipeline = WeatherPipeline(db)
+    pipeline.parser.parse_stations_and_insert(stations_path)
+
+    output_path = downloader.download_and_extract_us_stations(year)
+
+    print(f"Data downloaded and extracted to: {output_path}")

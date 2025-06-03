@@ -1,8 +1,10 @@
 .env
+.env.*
 **/__pycache__/
 venv/
 postgres-data/
 data/
+webserver_config.py
 
 # dbt artifacts
 dbt_packages/
@@ -14,3 +16,23 @@ target/
 
 # Global DBT profile
 .dbt/
+
+# Airflow
+airflow.cfg
+airflow/logs/
+airflow/__pycache__/
+airflow/tmp/
+**/airflow.db
+**/unittests.db
+*.pyo
+*.pyd
+
+# Docker
+*.log
+postgres-data/
+dbt.log
+*.pid
+
+# VSCode or other IDEs
+.vscode/
+.idea/
