@@ -27,6 +27,34 @@ class NOAAParser:
             "MIN": 9999.9,
         }
 
+    def filter_us_stations_ids(self, df):
+        df = df[df['CTRY'] == 'US']
+        df['STATION'] = df['USAF'].astype(str).str.zfill(6) + df['WBAN'].astype(str).str.zfill(5)
+        return df
+
+    def parse_stations_and_insert(self, stations_path):
+        if self.db.is_file_already_ingested(self.project_name, stations_path):
+            print("Stations data already ingested. Skipping.")
+            return
+
+        try:
+            df = pd.read_csv(stations_path)
+            df = self.filter_us_stations_ids(df)
+        except Exception as e:
+            self.db.log_ingestion(self.project_name, stations_path, 0, False, str(e))
+            return
+
+        ingestion_id = self.db.log_ingestion(self.project_name, stations_path, 0)
+        rows_inserted = 0
+
+        for _, row in tqdm(df.iterrows(), total=len(df), desc="Insert stations"):
+            self.db.insert_station(row, ingestion_id)
+            rows_inserted += 1
+
+        self.db.conn.commit()
+        self.db.update_ingestion_record(ingestion_id, rows_inserted, success=True)
+        print(f"Inserted {rows_inserted} US stations.")
+
     def parse_folder_and_insert(self, folder_path):
         file_list = [f for f in os.listdir(folder_path) if f.endswith(".csv")]
 
@@ -36,7 +64,6 @@ class NOAAParser:
             if self.db.is_file_already_ingested(self.project_name, file_path):
                 continue
             ingestion_id = self.db.log_ingestion(self.project_name, file_path, 0, success=True)
-            # tqdm.write(f"Processing: {file_path}")
 
             try:
                 df = pd.read_csv(file_path, dtype={"STATION": str})
@@ -89,5 +116,4 @@ class NOAAParser:
                     rows_inserted += 1
 
             self.db.conn.commit()
-            # tqdm.write(f"Inserted {rows_inserted} rows into the daily_weather from {file_path}")
             self.db.update_ingestion_record(ingestion_id, rows_inserted, success=True)
